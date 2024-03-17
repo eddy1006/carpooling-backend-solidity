@@ -16,10 +16,10 @@ pragma solidity 0.8.24;
 // cancel by passenger and by driver
 // withdraw money via driver
 
-// Things that can be implemented in this contract 
-// 1. Fallback functions 
+// Things that can be implemented in this contract
+// 1. Fallback functions
 // 2. Time based cancellation refund system
-// 3. Events 
+// 3. Events
 // 4. Writing tests (just in case if you feel like)
 
 error ERROR_CarPooling(string message);
@@ -33,7 +33,6 @@ contract CarPooling {
         uint256 rideId;
         uint256 time; // startTime
         string tripDetails; // source and des
-        string carDetails; // car type ac non ac
     }
 
     mapping(uint256 => Ride) public rides;
@@ -47,13 +46,12 @@ contract CarPooling {
         uint256 mp,
         uint256 rf,
         uint256 t,
-        string memory td,
-        string memory cd
+        string memory td
     ) public {
         rideCount += 1;
         uint256 rid = rideCount;
         address[] memory p;
-        rides[rid] = Ride(msg.sender, p, mp, rf, rid, t, td, cd);
+        rides[rid] = Ride(msg.sender, p, mp, rf, rid, t, td);
 
         addressToRides[msg.sender].push(rid);
         completionStatus[rid] = 0;
@@ -262,7 +260,6 @@ contract CarPooling {
             uint256,
             uint256,
             uint256,
-            string memory,
             string memory
         )
     {
@@ -274,8 +271,7 @@ contract CarPooling {
             r.rideFare,
             r.rideId,
             r.time,
-            r.tripDetails,
-            r.carDetails
+            r.tripDetails
         );
     }
 
@@ -301,7 +297,6 @@ contract CarPooling {
         uint256[] memory rideId = new uint256[](userRides.length);
         uint256[] memory time = new uint256[](userRides.length);
         string[] memory td = new string[](userRides.length);
-        string[] memory cd = new string[](userRides.length);
 
         for (uint256 i = 0; i < userRides.length; i++) {
             Ride memory r = rides[userRides[i]]; // CHECK IF RIDE EXISTS FOR GIVEN ID OR NOT
@@ -313,7 +308,6 @@ contract CarPooling {
                 rideId[i] = r.rideId;
                 time[i] = r.time;
                 td[i] = r.tripDetails;
-                cd[i] = r.carDetails;
             }
         }
 
@@ -350,7 +344,6 @@ contract CarPooling {
         uint256[] memory rideId = new uint256[](keys.length);
         uint256[] memory time = new uint256[](keys.length);
         string[] memory td = new string[](keys.length);
-        string[] memory cd = new string[](keys.length);
 
         for (uint256 i = 0; i < keys.length; i++) {
             Ride memory r = rides[keys[i]]; // CHECK IF RIDE EXISTS FOR GIVEN ID OR NOT
@@ -362,7 +355,6 @@ contract CarPooling {
                 rideId[i] = r.rideId;
                 time[i] = r.time;
                 td[i] = r.tripDetails;
-                cd[i] = r.carDetails;
             }
         }
 
@@ -374,6 +366,6 @@ contract CarPooling {
             rideId,
             time,
             td
-        ); // need to add cd fix stack error
+        );
     }
 }

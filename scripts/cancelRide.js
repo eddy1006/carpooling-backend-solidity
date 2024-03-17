@@ -4,7 +4,7 @@ async function main() {
   const { deployer } = await getNamedAccounts();
   const carpooling = await ethers.getContract("CarPooling", deployer);
   console.log("Carpooling contract.....");
-  var transactionResponse = await carpooling.cancelRide(1);
+  var transactionResponse = await carpooling.cancelRide(3);
   console.log(transactionResponse);
 }
 
