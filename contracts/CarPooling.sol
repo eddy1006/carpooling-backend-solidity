@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "./PriceConverter.sol";
+
 // Create ride
 // book ride
 // withdraw money for ride
@@ -25,6 +28,14 @@ pragma solidity 0.8.24;
 error ERROR_CarPooling(string message);
 
 contract CarPooling {
+    using PriceConverter for uint256;
+
+    AggregatorV3Interface public s_priceFeed;
+
+    constructor(address priceFeedAddress) {
+        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
+    }
+
     struct Ride {
         address driver; // time // locations (source and destination)
         address[] passengers;
@@ -51,6 +62,8 @@ contract CarPooling {
         rideCount += 1;
         uint256 rid = rideCount;
         address[] memory p;
+        rf = rf * 1e18;
+        rf = rf.getPriceInEth(s_priceFeed);
         rides[rid] = Ride(msg.sender, p, mp, rf, rid, t, td);
 
         addressToRides[msg.sender].push(rid);
@@ -59,6 +72,10 @@ contract CarPooling {
     }
 
     function bookRide(uint256 rideId) public payable duplicate(rideId) {
+        if (msg.value < rides[rideId].rideFare)
+            revert ERROR_CarPooling({
+                message: "Money sent not equal to ride Fare"
+            });
         rides[rideId].passengers.push(msg.sender);
         addressToRides[msg.sender].push(rideId);
     }
@@ -112,7 +129,6 @@ contract CarPooling {
 
         uint256 count = rides[rideId].passengers.length;
         uint256 amount = count * rides[rideId].rideFare;
-        amount = amount * 1e18;
 
         (bool callSuccess, ) = payable(msg.sender).call{value: amount}("");
         require(callSuccess, "Call method failed");
@@ -156,7 +172,6 @@ contract CarPooling {
             // return full money back to all passengers
             address[] memory passengers = r.passengers;
             uint256 amount = r.rideFare;
-            amount = amount * 1e18;
 
             for (uint256 i = 0; i < passengers.length; i++) {
                 address p = passengers[i];
@@ -221,7 +236,7 @@ contract CarPooling {
             // return half of the money back to passenger  ( can make it time based in future)
             uint256 amount = r.rideFare;
             amount = amount / 2;
-            amount = amount * 1e18;
+
             (bool callSuccess1, ) = payable(passenger).call{value: amount}("");
             require(callSuccess1, "Call method failed");
 
