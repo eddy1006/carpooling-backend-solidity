@@ -20,9 +20,9 @@ import "./PriceConverter.sol";
 // withdraw money via driver
 
 // Things that can be implemented in this contract
-// 1. Fallback functions
-// 2. Time based cancellation refund system
-// 3. Events
+// 1. Fallback functions  --> not needed
+// 2. Time based cancellation refund system 
+// 3. Events -> added 
 // 4. Writing tests (just in case if you feel like)
 
 error ERROR_CarPooling(string message);
@@ -35,6 +35,17 @@ contract CarPooling {
     constructor(address priceFeedAddress) {
         s_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
+
+    event RideCreated(
+        uint256 indexed rideId,
+        address driver,
+        uint256 maxPassengers,
+        uint256 rideFare,
+        uint256 time,
+        string tripDetails
+    );
+    event RideBooked(uint256 indexed rideId, address[] passengers);
+    event StatusUpdate(uint256 indexed rideId, uint256 completedStatus);
 
     struct Ride {
         address driver; // time // locations (source and destination)
@@ -69,6 +80,8 @@ contract CarPooling {
         addressToRides[msg.sender].push(rid);
         completionStatus[rid] = 0;
         rideKeys.push(rid);
+
+        emit RideCreated(rid, msg.sender, mp, rf, t, td);
     }
 
     function bookRide(uint256 rideId) public payable duplicate(rideId) {
@@ -78,6 +91,8 @@ contract CarPooling {
             });
         rides[rideId].passengers.push(msg.sender);
         addressToRides[msg.sender].push(rideId);
+
+        emit RideBooked(rideId, rides[rideId].passengers);
     }
 
     modifier duplicate(uint256 rideId) {
@@ -114,6 +129,8 @@ contract CarPooling {
         // erase this ride from passengers list
         addressToRides[passenger][index] = pRides[pRides.length - 1];
         addressToRides[passenger].pop();
+
+        emit StatusUpdate(rideId, completionStatus[rideId]);
     }
 
     function rideCompleted(uint256 rideId) public {

@@ -5,10 +5,10 @@ async function main() {
   const carpooling = await ethers.getContract("CarPooling", deployer);
   console.log("Carpooling contract.....");
   const transactionResponse = await carpooling.createRide(
-    5,
-    15,
+    3,
+    25,
     Math.round(Date.now() / 1000),
-    "Source: Colony A + Destination: Colony B + Car Details: Thar + Driver Details: Aadhar Number + Pick up point: parking area + Distance : 1km + Gas Price : x"
+    "Source: Airport + Destination: Hotel + Car Details: Swift Dzire + Driver Details: Aadhar Number + Pick up point: Gate No. 4 + Distance : 7km + Gas Price : x"
   );
   await transactionResponse.wait(1);
   console.log("Ride created");
